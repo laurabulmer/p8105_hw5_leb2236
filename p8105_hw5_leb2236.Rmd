@@ -24,6 +24,38 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
+## Problem 1 
+
+```{r}
+# First putting people in the room and checking duplicates.
+
+bday_sim = function(n) {
+  bdays = sample(1:365, size = n, replace = TRUE)
+  duplicate = length(unique(bdays)) < n
+  return(duplicate)
+}
+bday_sim(10)
+```
+
+```{r}
+# Running the function 10000 times for each group size 2-50.
+
+sim_res = 
+  expand_grid(
+    n = 2:50,
+    iter = 1:10000
+  ) |> 
+  mutate(res = map_lgl(n, bday_sim)) |> 
+  group_by(n) |> 
+  summarize(prob = mean(res))
+
+sim_res |> 
+  ggplot(aes(x = n, y = prob )) + 
+  geom_line()
+```
+
+From this plot, we can conclude that as group size increases, the likelihood of shared birthdays will also increase.
+
 ## Problem 2
 
 ```{r}
@@ -193,7 +225,8 @@ results_props =
   )%>%
   unnest(results) %>%
   select(city_state, estimate, conf.low, conf.high)
-  
+
+results_props 
 ```
 
 The next step is to plot the estimates and CIs for each city.
